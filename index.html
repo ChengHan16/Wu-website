@@ -1,12 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My First Webpage</title>
+  <title>旅遊行程</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    header {
+      background-color: #008CBA;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+    }
+    h1 {
+      margin: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .day-schedule {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .day-schedule:last-child {
+      border-bottom: none;
+    }
+    .day-title {
+      font-size: 1.6em;
+      color: #333;
+    }
+    .day-details {
+      font-size: 1.2em;
+      color: #555;
+    }
+    .activity {
+      margin-left: 20px;
+      font-size: 1.1em;
+    }
+    .location {
+      font-style: italic;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, GitHub Pages!</h1>
-  <p>Welcome to my website hosted on GitHub Pages.</p>
+
+  <header>
+    <h1>7日東南亞旅遊行程</h1>
+  </header>
+
+  <div class="container">
+    <div class="day-schedule">
+      <div class="day-title">第1天：到達曼谷</div>
+      <div class="day-details">
+        <div class="activity">- 抵達曼谷，機場接機</div>
+        <div class="activity">- 參觀大皇宮</div>
+        <div class="activity">- 品嚐當地美食（泰式炒河粉）</div>
+      </div>
+    </div>
+
+    <div class="day-schedule">
+      <div class="day-title">第2天：曼谷市區遊</div>
+      <div class="day-details">
+        <div class="activity">- 參觀玉佛寺</div>
+        <div class="activity">- 乘坐湄南河遊船</div>
+        <div class="activity">- 晚上逛曼谷夜市</div>
+      </div>
+    </div>
+
+    <div class="day-schedule">
+      <div class="day-title">第3天：前往清邁</div>
+      <div class="day-details">
+        <div class="activity">- 搭乘飛機前往清邁</div>
+        <div class="activity">- 參觀清邁古城</div>
+        <div class="activity">- 參拜帕辛寺</div>
+      </div>
+    </div>
+    
+    <!-- 更多天數的行程 -->
+  </div>
+
 </body>
 </html>
