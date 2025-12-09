@@ -133,8 +133,8 @@
       measurementId: "G-QRHMVH5RCF"
     };
     // 初始化 Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
 
     // 登入用戶
     function loginUser() {
