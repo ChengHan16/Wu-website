@@ -3,120 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>旅遊行程計劃</title>
+  <title>Firebase Authentication 範例</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f1f1f1;
-    }
-    header {
-      background-color: #6fa3f5;
-      color: white;
-      text-align: center;
-      padding: 30px 0;
-    }
-    .container {
-      width: 80%;
-      margin: 20px auto;
-    }
-    .day {
-      background-color: white;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-    .day img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-    }
-    .day-content {
+      font-family: Arial, sans-serif;
       padding: 20px;
+      background-color: #f4f4f4;
     }
-    .day-title {
-      font-size: 1.8em;
+    h1 {
       color: #333;
     }
-    .day-description {
-      margin-top: 10px;
-      font-size: 1.2em;
-      color: #555;
+    .form-container {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      margin: auto;
     }
-    .activities {
-      margin-top: 15px;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
     }
-    .activity {
-      font-size: 1.1em;
-      color: #666;
-      margin-left: 20px;
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .message {
+      color: green;
+      font-weight: bold;
+      text-align: center;
     }
     .error-message {
-      text-align: center;
       color: red;
-      font-size: 1.2em;
-      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>東南亞 7日旅行計劃</h1>
-  </header>
+  <h1>Firebase Authentication 範例</h1>
 
-  <!-- 密碼驗證 -->
+  <!-- 註冊表單 -->
+  <div class="form-container" id="register-form">
+    <h3>註冊</h3>
+    <input type="email" id="email" placeholder="輸入電子郵件" required>
+    <input type="password" id="password" placeholder="輸入密碼" required>
+    <button onclick="registerUser()">註冊</button>
+    <div id="register-message" class="message"></div>
+  </div>
+
+  <!-- 登入表單 -->
+  <div class="form-container" id="login-form">
+    <h3>登入</h3>
+    <input type="email" id="login-email" placeholder="輸入電子郵件" required>
+    <input type="password" id="login-password" placeholder="輸入密碼" required>
+    <button onclick="loginUser()">登入</button>
+    <div id="login-message" class="message"></div>
+  </div>
+
+  <!-- Google 登入 -->
+  <div class="form-container">
+    <button onclick="googleLogin()">使用 Google 登入</button>
+  </div>
+
+  <!-- 登出 -->
+  <div class="form-container">
+    <button onclick="logoutUser()">登出</button>
+    <div id="logout-message" class="message"></div>
+  </div>
+
+  <!-- 顯示用戶資訊 -->
+  <div id="user-info" class="message"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  
   <script>
-    // 設定正確的密碼
-    var correctPassword = "yourpassword"; // 請替換成你自己的密碼
+    // Firebase 配置（從 Firebase Console 獲取）
+  const firebaseConfig = {
+    apiKey: "AIzaSyDI68x_gvXQNK7j72O7Ue7hS_LW91b1WfU",
+    authDomain: "wu-web-e638e.firebaseapp.com",
+    projectId: "wu-web-e638e",
+    storageBucket: "wu-web-e638e.firebasestorage.app",
+    messagingSenderId: "19456076464",
+    appId: "1:19456076464:web:1d08b63c7df8351e64a975",
+    measurementId: "G-QRHMVH5RCF"
+  };
 
-    // 顯示密碼提示
-    var userPassword = prompt("請輸入密碼");
+    // 初始化 Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    // 檢查密碼是否正確
-    if (userPassword !== correctPassword) {
-      // 密碼錯誤，顯示錯誤信息
-      document.body.innerHTML = '<div class="error-message">密碼錯誤，無法訪問此頁面！</div>';
-    } else {
-      // 密碼正確，顯示網頁內容
-      document.body.innerHTML += `
-        <div class="container">
-          <div class="day">
-            <img src="https://via.placeholder.com/1200x500" alt="Day 1">
-            <div class="day-content">
-              <div class="day-title">第1天：曼谷市區遊</div>
-              <div class="day-description">
-                探索曼谷的經典景點，像是大皇宮和玉佛寺，感受泰國的歷史和文化。
-              </div>
-              <div class="activities">
-                <div class="activity">- 參觀大皇宮</div>
-                <div class="activity">- 探訪玉佛寺</div>
-                <div class="activity">- 夜遊湄南河</div>
-              </div>
-            </div>
-          </div>
+    // 註冊用戶
+    function registerUser() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-          <div class="day">
-            <img src="https://via.placeholder.com/1200x500" alt="Day 2">
-            <div class="day-content">
-              <div class="day-title">第2天：清邁市區與古城之旅</div>
-              <div class="day-description">
-                前往清邁，參觀古老的寺廟和夜市，體驗北方泰國的魅力。
-              </div>
-              <div class="activities">
-                <div class="activity">- 參觀清邁古城</div>
-                <div class="activity">- 參拜帕辛寺</div>
-                <div class="activity">- 逛清邁夜市</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 更多天數的行程 -->
-        </div>
-      `;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          document.getElementById("register-message").textContent = `註冊成功，歡迎 ${user.email}`;
+          document.getElementById("register-form").reset();
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          document.getElementById("register-message").textContent = `錯誤：${errorMessage}`;
+        });
     }
+
+    // 登入用戶
+    function loginUser() {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          document.getElementById("login-message").textContent = `登入成功，歡迎 ${user.email}`;
+          document.getElementById("user-info").textContent = `已登入：${user.email}`;
+          document.getElementById("login-form").reset();
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          document.getElementById("login-message").textContent = `錯誤：${errorMessage}`;
+        });
+    }
+
+    // 使用 Google 登入
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          document.getElementById("user-info").textContent = `已登入：${user.displayName} (${user.email})`;
+          document.getElementById("login-message").textContent = `登入成功，歡迎 ${user.displayName}`;
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          document.getElementById("login-message").textContent = `錯誤：${errorMessage}`;
+        });
+    }
+
+    // 登出用戶
+    function logoutUser() {
+      auth.signOut().then(() => {
+        document.getElementById("logout-message").textContent = "登出成功！";
+        document.getElementById("user-info").textContent = "";
+      }).catch((error) => {
+        document.getElementById("logout-message").textContent = `錯誤：${error.message}`;
+      });
+    }
+
+    // 監聽用戶登入狀態
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // 如果用戶已登入，顯示用戶信息
+        document.getElementById("user-info").textContent = `已登入：${user.email}`;
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("register-form").style.display = "none";
+        document.querySelector(".form-container button").style.display = "none";  // 隱藏 Google 登入按鈕
+      } else {
+        // 如果用戶未登入，顯示登入表單
+        document.getElementById("login-form").style.display = "block";
+        document.getElementById("register-form").style.display = "block";
+        document.querySelector(".form-container button").style.display = "block"; // 顯示 Google 登入按鈕
+      }
+    });
   </script>
 
 </body>
