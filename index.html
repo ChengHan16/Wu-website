@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Authentication 範例</title>
+  <title>旅遊行程與 Firebase 登入</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -22,7 +22,7 @@
       max-width: 400px;
       margin: auto;
     }
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -30,12 +30,8 @@
       border-radius: 5px;
     }
     button {
-      width: 100%;
-      padding: 10px;
       background-color: #007bff;
       color: white;
-      border: none;
-      border-radius: 5px;
       cursor: pointer;
     }
     button:hover {
@@ -51,20 +47,32 @@
       font-weight: bold;
       text-align: center;
     }
+    .tour-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .tour-card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .tour-card h3 {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+    .tour-card p {
+      font-size: 0.9em;
+      color: #555;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Firebase Authentication 範例</h1>
-
-  <!-- 註冊表單 -->
-  <div class="form-container" id="register-form">
-    <h3>註冊</h3>
-    <input type="email" id="email" placeholder="輸入電子郵件" required>
-    <input type="password" id="password" placeholder="輸入密碼" required>
-    <button onclick="registerUser()">註冊</button>
-    <div id="register-message" class="message"></div>
-  </div>
+  <h1>旅遊行程與 Firebase 登入</h1>
 
   <!-- 登入表單 -->
   <div class="form-container" id="login-form">
@@ -89,43 +97,44 @@
   <!-- 顯示用戶資訊 -->
   <div id="user-info" class="message"></div>
 
+  <!-- 旅遊行程展示區 -->
+  <div id="tour-plans" style="display:none;">
+    <h2>推薦旅遊行程</h2>
+    <div class="tour-card">
+      <img src="https://via.placeholder.com/600x400?text=Paris" alt="Paris">
+      <h3>巴黎浪漫之旅</h3>
+      <p>探索巴黎的浪漫景點，從艾菲爾鐵塔到羅浮宮。</p>
+    </div>
+    <div class="tour-card">
+      <img src="https://via.placeholder.com/600x400?text=Tokyo" alt="Tokyo">
+      <h3>東京城市之旅</h3>
+      <p>享受東京的繁華與傳統，從淺草寺到秋葉原。</p>
+    </div>
+    <div class="tour-card">
+      <img src="https://via.placeholder.com/600x400?text=New+York" alt="New York">
+      <h3>紐約經典之旅</h3>
+      <p>在紐約的街頭感受多元文化，從自由女神像到中央公園。</p>
+    </div>
+  </div>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
   
   <script>
     // Firebase 配置（從 Firebase Console 獲取）
-  const firebaseConfig = {
-    apiKey: "AIzaSyDI68x_gvXQNK7j72O7Ue7hS_LW91b1WfU",
-    authDomain: "wu-web-e638e.firebaseapp.com",
-    projectId: "wu-web-e638e",
-    storageBucket: "wu-web-e638e.firebasestorage.app",
-    messagingSenderId: "19456076464",
-    appId: "1:19456076464:web:1d08b63c7df8351e64a975",
-    measurementId: "G-QRHMVH5RCF"
-  };
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
     // 初始化 Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-
-    // 註冊用戶
-    function registerUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          document.getElementById("register-message").textContent = `註冊成功，歡迎 ${user.email}`;
-          document.getElementById("register-form").reset();
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          document.getElementById("register-message").textContent = `錯誤：${errorMessage}`;
-        });
-    }
 
     // 登入用戶
     function loginUser() {
@@ -137,7 +146,8 @@
           const user = userCredential.user;
           document.getElementById("login-message").textContent = `登入成功，歡迎 ${user.email}`;
           document.getElementById("user-info").textContent = `已登入：${user.email}`;
-          document.getElementById("login-form").reset();
+          document.getElementById("login-form").style.display = "none";  // 隱藏登入表單
+          document.getElementById("tour-plans").style.display = "block";  // 顯示旅遊行程
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -154,7 +164,8 @@
         .then((result) => {
           const user = result.user;
           document.getElementById("user-info").textContent = `已登入：${user.displayName} (${user.email})`;
-          document.getElementById("login-message").textContent = `登入成功，歡迎 ${user.displayName}`;
+          document.getElementById("login-form").style.display = "none";
+          document.getElementById("tour-plans").style.display = "block";
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -168,6 +179,8 @@
       auth.signOut().then(() => {
         document.getElementById("logout-message").textContent = "登出成功！";
         document.getElementById("user-info").textContent = "";
+        document.getElementById("login-form").style.display = "block";
+        document.getElementById("tour-plans").style.display = "none";
       }).catch((error) => {
         document.getElementById("logout-message").textContent = `錯誤：${error.message}`;
       });
@@ -176,16 +189,14 @@
     // 監聽用戶登入狀態
     auth.onAuthStateChanged((user) => {
       if (user) {
-        // 如果用戶已登入，顯示用戶信息
+        // 如果用戶已登入，顯示用戶信息和旅遊行程
         document.getElementById("user-info").textContent = `已登入：${user.email}`;
         document.getElementById("login-form").style.display = "none";
-        document.getElementById("register-form").style.display = "none";
-        document.querySelector(".form-container button").style.display = "none";  // 隱藏 Google 登入按鈕
+        document.getElementById("tour-plans").style.display = "block";
       } else {
         // 如果用戶未登入，顯示登入表單
         document.getElementById("login-form").style.display = "block";
-        document.getElementById("register-form").style.display = "block";
-        document.querySelector(".form-container button").style.display = "block"; // 顯示 Google 登入按鈕
+        document.getElementById("tour-plans").style.display = "none";
       }
     });
   </script>
