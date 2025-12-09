@@ -3,93 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>旅遊行程</title>
+  <title>旅遊行程計劃</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f9;
+      background-color: #f1f1f1;
     }
     header {
-      background-color: #008CBA;
+      background-color: #6fa3f5;
       color: white;
       text-align: center;
-      padding: 20px 0;
-    }
-    h1 {
-      margin: 0;
+      padding: 30px 0;
     }
     .container {
-      max-width: 1000px;
+      width: 80%;
       margin: 20px auto;
-      padding: 20px;
+    }
+    .day {
       background-color: white;
+      margin-bottom: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
     }
-    .day-schedule {
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #ddd;
+    .day img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
     }
-    .day-schedule:last-child {
-      border-bottom: none;
+    .day-content {
+      padding: 20px;
     }
     .day-title {
-      font-size: 1.6em;
+      font-size: 1.8em;
       color: #333;
     }
-    .day-details {
+    .day-description {
+      margin-top: 10px;
       font-size: 1.2em;
       color: #555;
     }
-    .activity {
-      margin-left: 20px;
-      font-size: 1.1em;
+    .activities {
+      margin-top: 15px;
     }
-    .location {
-      font-style: italic;
-      color: #888;
+    .activity {
+      font-size: 1.1em;
+      color: #666;
+      margin-left: 20px;
+    }
+    .error-message {
+      text-align: center;
+      color: red;
+      font-size: 1.2em;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>台灣行程</h1>
+    <h1>東南亞 7日旅行計劃</h1>
   </header>
 
-  <div class="container">
-    <div class="day-schedule">
-      <div class="day-title">第1天：</div>
-      <div class="day-details">
-        <div class="activity">- 抵達台灣</div>
-        <div class="activity">- 台北高鐵</div>
-        <div class="activity">- 台南仁德聚餐</div>
-      </div>
-    </div>
+  <!-- 密碼驗證 -->
+  <script>
+    // 設定正確的密碼
+    var correctPassword = "yourpassword"; // 請替換成你自己的密碼
 
-    <div class="day-schedule">
-      <div class="day-title">第2天：台南</div>
-      <div class="day-details">
-        <div class="activity">- 美食</div>
-        <div class="activity">- 逛街</div>
-        <div class="activity">- 夜市</div>
-      </div>
-    </div>
+    // 顯示密碼提示
+    var userPassword = prompt("請輸入密碼");
 
-    <div class="day-schedule">
-      <div class="day-title">第3天：五月天</div>
-      <div class="day-details">
-        <div class="activity">- 演唱會</div>
-        <div class="activity">- 台中旅遊</div>
-        <div class="activity">- 回程</div>
-      </div>
-    </div>
-    
-    <!-- 更多天數的行程 -->
-  </div>
-
-</body>
-</html>
+    // 檢查密碼是否正確
+    if (userPassword !== correctPassword) {
+      // 密碼錯誤，顯示錯誤信息
+      document.body.innerHTML = '<div class="error-message">密碼錯誤，無法訪問此頁面！</div>';
+    } else {
+      // 密碼正確，顯示網頁內容
+      document.body.innerHTML += `
+        <div class="container">
+          <div class="day">
+            <img src="https://via.placeholder.com/1200x500" alt="Day 1">
+            <div class="day-content">
+              <div class="day-title">第1天：曼谷市區遊</div>
+              <div class="day-description">
+                探索曼谷的經典景點，像是大皇宮和玉佛寺，感受泰國的歷史和文化。
+              </div>
+              <div class="activities">
+                <div class="activity">- 參觀大皇宮</div>
+                <div class="activity">- 探訪玉佛寺</div>
+                <div class="activity">- 夜遊湄南河</div>
+              </div>
+            </div>
+          </div>
