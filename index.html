@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>大阪旅遊 - 交通與住宿指南</title>
     <style>
         /* 日式極簡風格設定 */
@@ -15,7 +15,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            padding: 20px; /* 手機版縮小內距 */
         }
 
         /* 頂部大標題 */
@@ -23,13 +23,15 @@
             background-color: #fff;
             border-top: 5px solid #c0504d; /* 日本紅 */
             border-bottom: 1px solid #d1d1d1;
-            padding: 20px 80px;
-            font-size: 32px;
+            padding: 20px 40px; /* 優化手機內距 */
+            font-size: 28px; /* 手機縮小字體 */
             font-weight: 700;
-            margin-bottom: 50px;
-            letter-spacing: 10px;
+            margin-bottom: 30px;
+            letter-spacing: 5px; /* 手機縮小間距 */
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             text-align: center;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .container {
@@ -42,20 +44,21 @@
         /* 左側主內容區 */
         .content-box {
             background: #ffffff;
-            padding: 40px;
+            padding: 30px; /* 優化手機內距 */
             flex: 2.5;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border: 1px solid #e0e0e0;
+            overflow: hidden; /* 防止內容溢出 */
         }
 
-        .section-anchor { padding-top: 20px; margin-bottom: 60px; }
+        .section-anchor { padding-top: 20px; margin-bottom: 40px; }
 
         .content-title {
             color: #2d2d2d;
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-bottom: 2px solid #c0504d;
             display: inline-block;
             padding-bottom: 5px;
@@ -65,65 +68,67 @@
         .apps-grid {
             display: flex;
             justify-content: space-around;
-            gap: 20px;
+            gap: 15px;
         }
         .app-item {
             width: 48%;
             background: #fff;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             border: 1px solid #f0f0f0;
             text-align: center;
             transition: transform 0.3s;
+            box-sizing: border-box;
         }
         .app-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        .app-icon { width: 90px; height: 90px; border-radius: 20px; margin-bottom: 15px; }
-        .app-name { font-size: 18px; font-weight: bold; color: #2980b9; margin-bottom: 15px; display: inline-block; border-bottom: 2px solid #2980b9; }
-        .app-features { text-align: left; list-style: none; padding: 0; font-size: 14px; color: #666; line-height: 1.8; }
-        .app-features li::before { content: "● "; color: #c0504d; font-size: 10px; margin-right: 5px; }
+        .app-icon { width: 70px; height: 70px; border-radius: 18px; margin-bottom: 15px; }
+        .app-name { font-size: 16px; font-weight: bold; color: #2980b9; margin-bottom: 10px; display: inline-block; border-bottom: 2px solid #2980b9; }
+        .app-features { text-align: left; list-style: none; padding: 0; font-size: 13px; color: #666; line-height: 1.6; }
+        .app-features li::before { content: "● "; color: #c0504d; font-size: 8px; margin-right: 5px; }
 
         /* 電車路線步驟卡片 */
         .step-card {
             display: flex;
             background: #fafafa;
             border-radius: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             overflow: hidden;
             border: 1px solid #eee;
         }
         .step-card.reverse { flex-direction: row-reverse; }
-        .step-text { padding: 30px; flex: 1.2; }
-        .step-text h3 { color: #c0504d; margin-top: 0; font-size: 20px; border-left: 5px solid #c0504d; padding-left: 10px; }
-        .step-text p { line-height: 1.8; font-size: 15px; }
-        .step-image { flex: 1; background: #fff; display: flex; align-items: center; justify-content: center; padding: 15px; }
-        .step-image img { width: 100%; height: auto; border-radius: 8px; border: 1px solid #ddd; }
+        .step-text { padding: 20px; flex: 1.2; }
+        .step-text h3 { color: #c0504d; margin-top: 0; font-size: 18px; border-left: 5px solid #c0504d; padding-left: 10px; }
+        .step-text p { line-height: 1.6; font-size: 14px; margin: 10px 0; }
+        .step-image { flex: 1; background: #fff; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        .step-image img { width: 100%; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #ddd; }
 
         .highlight-red { color: #e74c3c; font-weight: bold; }
-        .tip-box { background: #fff9e6; padding: 15px; border-radius: 8px; font-size: 14px; border-left: 5px solid #f1c40f; color: #7f6000; margin-top: 15px; }
+        .tip-box { background: #fff9e6; padding: 12px; border-radius: 8px; font-size: 13px; border-left: 5px solid #f1c40f; color: #7f6000; margin-top: 15px; }
 
         /* 標誌示意圖區塊 */
         .sign-image-container { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
-        .sign-image-container img { width: 100%; display: block; }
+        .sign-image-container img { width: 100%; height: auto; display: block; }
 
         /* 飯店類別樣式 */
-        .hotel-list { display: flex; flex-direction: column; gap: 20px; }
+        .hotel-list { display: flex; flex-direction: column; gap: 15px; }
         .hotel-item {
             background: #fff;
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
             border: 1px solid #eee;
             transition: all 0.3s;
         }
         .hotel-item:hover { border-color: #c0504d; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .hotel-name { font-size: 18px; font-weight: bold; color: #c0504d; margin-bottom: 10px; display: block; }
-        .hotel-info { font-size: 14px; line-height: 1.6; color: #555; }
-        .hotel-link { color: #2980b9; text-decoration: underline; font-size: 13px; margin-top: 8px; display: inline-block; }
+        .hotel-name { font-size: 17px; font-weight: bold; color: #c0504d; margin-bottom: 8px; display: block; }
+        .hotel-price { font-size: 13px; font-weight: bold; color: #d35400; background: #fdf2e9; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+        .hotel-info { font-size: 13px; line-height: 1.5; color: #555; }
+        .hotel-link { color: #2980b9; text-decoration: underline; font-size: 12px; margin-top: 10px; display: inline-block; }
 
         /* 右側導覽選單 */
         .sidebar {
             background: #2d3436;
             color: white;
-            padding: 30px 20px;
+            padding: 30px 15px;
             flex: 0.8;
             border-radius: 15px;
             height: fit-content;
@@ -131,20 +136,32 @@
             top: 20px;
         }
         .sidebar-link { text-decoration: none; color: white; display: block; }
-        .sidebar-item { display: flex; align-items: center; padding: 12px; transition: background 0.3s; border-radius: 8px; font-size: 15px; }
+        .sidebar-item { display: flex; align-items: center; padding: 12px; transition: background 0.3s; border-radius: 8px; font-size: 14px; }
         .sidebar-item:hover { background: rgba(255,255,255,0.1); }
-        .circle-icon { width: 10px; height: 10px; background: #c0504d; border-radius: 50%; margin-right: 12px; }
+        .circle-icon { width: 8px; height: 8px; background: #c0504d; border-radius: 50%; margin-right: 12px; }
 
-        /* 手機版 RWD 適配 */
+        /* 手機版 RWD 適配 (精準優化) */
         @media (max-width: 768px) {
-            .container { flex-direction: column-reverse; }
-            .sidebar { position: relative; top: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 15px; }
-            .sidebar-item { border: 1px solid rgba(255,255,255,0.3); }
-            .apps-grid { flex-direction: column; }
+            body { padding: 10px; }
+            .container { flex-direction: column-reverse; gap: 20px; }
+            .main-title { padding: 15px 10px; font-size: 22px; letter-spacing: 2px; }
+            .content-box { padding: 20px; border-radius: 0; border: none; box-shadow: none; width: 100%; box-sizing: border-box; }
+            
+            /* APP 下載手機版排列 */
+            .apps-grid { flex-direction: column; gap: 15px; }
             .app-item { width: 100%; }
+
+            /* 導覽選單手機版排列 */
+            .sidebar { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; border-radius: 8px; }
+            .sidebar-item { padding: 8px; justify-content: center; border: 1px solid rgba(255,255,255,0.2); font-size: 13px; }
+            .circle-icon { display: none; } /* 手機版隱藏圓點省空間 */
+
+            /* 電車卡片手機版排列 */
             .step-card, .step-card.reverse { flex-direction: column; }
             .step-image { width: 100%; }
-            .main-title { padding: 15px 30px; font-size: 24px; letter-spacing: 5px; }
+            .step-text { width: 100%; box-sizing: border-box; }
+            
+            .content-title { font-size: 20px; width: 100%; display: block; text-align: center; border-bottom: 2px solid #c0504d; padding-bottom: 10px; }
         }
     </style>
 </head>
@@ -240,16 +257,19 @@
                 <div class="hotel-list">
                     <div class="hotel-item">
                         <span class="hotel-name">大阪難波相鐵 GRAND FRESA</span>
+                        <span class="hotel-price">平均房價：約 TWD 3,500 - 4,500 / 晚</span>
                         <div class="hotel-info">位於難波鬧區，周邊購物美食極其便利，且步行即可抵達多個地鐵站，是自由行的理想首選。</div>
                         <a href="https://sotetsu-hotels.com/grand-fresa/namba/" target="_blank" class="hotel-link">查看官方網站</a>
                     </div>
                     <div class="hotel-item">
-                        <span class="hotel-name">ホテルユニゾ大阪心斎橋 (Hotel Unizo Osaka Shinsaibashi)</span>
+                        <span class="hotel-name">ホテルユニゾ大阪心斎橋</span>
+                        <span class="hotel-price">平均房價：約 TWD 2,800 - 3,800 / 晚</span>
                         <div class="hotel-info">緊鄰心齋橋商店街，提供簡潔現代的住宿空間，對於喜愛逛街購物的旅客而言非常便利。</div>
                         <a href="https://www.unizo-hotel.co.jp/osaka.s/" target="_blank" class="hotel-link">查看官方網站</a>
                     </div>
                     <div class="hotel-item">
-                        <span class="hotel-name">クロスホテル大阪 (Cross Hotel Osaka)</span>
+                        <span class="hotel-name">クロスホテル大阪</span>
+                        <span class="hotel-price">平均房價：約 TWD 5,500 - 7,500 / 晚</span>
                         <div class="hotel-info">座落於戎橋筋入口旁，設計感十足，房間寬敞舒適，下樓即可享受道頓堀的熱鬧氛圍。</div>
                         <a href="https://www.crosshotel.com/osaka/" target="_blank" class="hotel-link">查看官方網站</a>
                     </div>
@@ -260,16 +280,16 @@
 
         <div class="sidebar">
             <a href="#app-section" class="sidebar-link">
-                <div class="sidebar-item"><div class="circle-icon"></div> APP 下載</div>
+                <div class="sidebar-item">APP 下載</div>
             </a>
             <a href="#route-section" class="sidebar-link">
-                <div class="sidebar-item"><div class="circle-icon"></div> 電車路線指南</div>
+                <div class="sidebar-item">電車路線指南</div>
             </a>
             <a href="#sign-section" class="sidebar-link">
-                <div class="sidebar-item"><div class="circle-icon"></div> 轉車標誌辨識</div>
+                <div class="sidebar-item">轉車標誌辨識</div>
             </a>
             <a href="#hotel-section" class="sidebar-link">
-                <div class="sidebar-item"><div class="circle-icon"></div> 推薦飯店</div>
+                <div class="sidebar-item">推薦飯店</div>
             </a>
         </div>
     </div>
