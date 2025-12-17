@@ -87,8 +87,40 @@
         .tip-box { background: #fff3cd; padding: 15px; border-radius: 8px; font-size: 14px; border-left: 5px solid #ffc107; margin: 15px 0; }
 
         /* 轉車標誌區塊 */
-        .sign-image-container { width: 100%; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .sign-image-container { width: 100%; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 50px; }
         .sign-image-container img { width: 100%; display: block; }
+
+        /* --- 推薦飯店樣式 --- */
+        .hotel-grid { display: flex; flex-direction: column; gap: 25px; }
+        .hotel-card {
+            display: flex;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+        .hotel-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .hotel-img { width: 250px; background-size: cover; background-position: center; flex-shrink: 0; }
+        .hotel-info { padding: 25px; flex-grow: 1; }
+        .hotel-name { font-size: 20px; font-weight: bold; color: #2d3436; margin-bottom: 10px; }
+        .hotel-tags { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .tag-price { background: #e1f5fe; color: #0288d1; }
+        .tag-loc { background: #f1f8e9; color: #558b2f; }
+        .hotel-details { font-size: 14px; color: #636e72; line-height: 1.6; margin-bottom: 20px; }
+        .hotel-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #c0504d;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .hotel-btn:hover { background: #a0403d; }
 
         /* 右側選單 */
         .sidebar {
@@ -113,7 +145,8 @@
             .sidebar { position: relative; top: 0; margin-bottom: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
             .sidebar-item { padding: 8px 15px; font-size: 14px; }
             .apps-grid { flex-direction: column; }
-            .step-card, .step-card.reverse { flex-direction: column; }
+            .step-card, .step-card.reverse, .hotel-card { flex-direction: column; }
+            .hotel-img { width: 100%; height: 200px; }
             .main-title { padding: 15px 30px; font-size: 24px; text-align: center; }
         }
     </style>
@@ -162,9 +195,9 @@
                         <p>搭乘電車時開啟乘車案內應用程式。</p>
                         <p>於「出發」欄位輸入<strong>伊丹空港</strong>。</p>
                         <p>於「到着」欄位輸入<strong>大阪難波</strong>。</p>
-                        <p>輸入完成後按「檢索」開始電車路線。結果如圖 2。</p>
+                        <p>輸入完成後按「檢索」開始電車路線。</p>
                         <div class="tip-box">
-                            💡 「出發」與「到着」欄位有些漢字的車站名也可以直接以中文輸入搜尋的到。<br>
+                            💡 提示：車站名可直接以中文輸入搜尋漢字。<br>
                             <strong>大阪空港、螢池、梅田、なんば</strong>
                         </div>
                     </div>
@@ -175,25 +208,12 @@
 
                 <div class="step-card reverse">
                     <div class="step-text">
-                        <h3>2. 確認時刻與轉乘標誌</h3>
-                        <p class="highlight-red">* 乘車前再次確認當場時刻表與 APP 的時間、幾號線是否一致。</p>
-                        <p>在大阪空港搭乘モノレール如出現像是圖 1 中 <strong>1、2 番線</strong>的情況，請對照當下車站時刻表的時間看 14:15 分的電車是在 1 號線還是 2 號線。</p>
-                        <p>大阪空港至螢池，14:18 分會在螢池 1 號線抵達，下車後找到 <strong>HK 47</strong> 標誌的標誌前進，在 HK 的 2 號線搭乘 14:23 分的電車。</p>
+                        <h3>2. 確認時刻與轉乘</h3>
+                        <p class="highlight-red">* 乘車前再次確認當場時刻表與 APP 的時間。</p>
+                        <p>大阪空港至螢池，14:18 分會在螢池 1 號線抵達，下車後找到 <strong>HK 47</strong> 標誌前進。</p>
                     </div>
                     <div class="step-image">
                         <img src="https://github.com/ChengHan16/Wu-website/blob/main/photo/%E5%9C%96%E7%89%874.png?raw=true" alt="圖4">
-                    </div>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-text">
-                        <h3>3. 最終轉乘抵達難波</h3>
-                        <p>搭乘 14:23 分後的電車後在 14:43 分會抵達大阪梅田。</p>
-                        <p>在這邊需要再轉一次車，從 <strong>HK 47</strong> 標誌的電車轉搭為 <strong>M</strong> 此標誌的電車。</p>
-                        <p>最後在 <strong>M 線路</strong>的 1 號線搭乘 14:52 分的車後就會抵達目的地<strong>難波 (なんば)</strong>。</p>
-                    </div>
-                    <div class="step-image">
-                        <img src="https://github.com/ChengHan16/Wu-website/blob/main/photo/%E5%9C%96%E7%89%873.png?raw=true" alt="圖3">
                     </div>
                 </div>
             </div>
@@ -202,6 +222,58 @@
                 <div class="content-title">轉車標誌示意圖</div>
                 <div class="sign-image-container">
                     <img src="https://github.com/ChengHan16/Wu-website/blob/main/photo/%E5%9C%96%E7%89%875.png?raw=true" alt="標誌示意圖">
+                </div>
+            </div>
+
+            <div id="hotel-section" class="section-anchor">
+                <div class="content-title">推薦飯店</div>
+                <div class="hotel-grid">
+                    
+                    <div class="hotel-card">
+                        <div class="hotel-img" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80');"></div>
+                        <div class="hotel-info">
+                            <div class="hotel-name">相鐵飯店 普雷薩 Inn - 大阪難波站前</div>
+                            <div class="hotel-tags">
+                                <span class="tag tag-price">預算：NT$ 2,500 - 4,000</span>
+                                <span class="tag tag-loc">地點：難波</span>
+                            </div>
+                            <div class="hotel-details">
+                                <strong>便利性：</strong>步行 1 分鐘即可抵達地鐵難波站及南海電鐵。對於往返關西機場或轉乘御堂筋線非常方便，樓下即有便利商店。
+                            </div>
+                            <a href="https://sotetsu-hotels.com/tw/presea/namba-ekimae/" target="_blank" class="hotel-btn">官方訂房</a>
+                        </div>
+                    </div>
+
+                    <div class="hotel-card">
+                        <div class="hotel-img" style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80');"></div>
+                        <div class="hotel-info">
+                            <div class="hotel-name">大阪格蘭比亞飯店 (Hotel Granvia Osaka)</div>
+                            <div class="hotel-tags">
+                                <span class="tag tag-price">預算：NT$ 4,500 - 7,000</span>
+                                <span class="tag tag-loc">地點：梅田 / JR 大阪站</span>
+                            </div>
+                            <div class="hotel-details">
+                                <strong>便利性：</strong>位於 JR 大阪站上方，出站即達。對於需要搭乘 JR 前往京都、神戶或使用阪急線、阪神線的旅客來說是地理位置的極致首選。
+                            </div>
+                            <a href="https://www.hotelgranviaosaka.jp/zh-tw/" target="_blank" class="hotel-btn">官方訂房</a>
+                        </div>
+                    </div>
+
+                    <div class="hotel-card">
+                        <div class="hotel-img" style="background-image: url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=400&q=80');"></div>
+                        <div class="hotel-info">
+                            <div class="hotel-name">大阪心齋橋光芒飯店 (Candeo Hotels)</div>
+                            <div class="hotel-tags">
+                                <span class="tag tag-price">預算：NT$ 3,500 - 5,500</span>
+                                <span class="tag tag-loc">地點：心齋橋 / 難波</span>
+                            </div>
+                            <div class="hotel-details">
+                                <strong>便利性：</strong>位於繁華的心齋橋商圈，頂樓設有露天大浴場。非常適合喜歡逛街购物、夜晚享用美食的旅客，生活機能極強。
+                            </div>
+                            <a href="https://www.candeohotels.com/tw/osaka-shinsaibashi/" target="_blank" class="hotel-btn">官方訂房</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             
@@ -216,6 +288,9 @@
             </a>
             <a href="#sign-section" class="sidebar-link">
                 <div class="sidebar-item"><div class="circle-icon"></div> 轉車標誌示意圖</div>
+            </a>
+            <a href="#hotel-section" class="sidebar-link">
+                <div class="sidebar-item"><div class="circle-icon"></div> 推薦飯店</div>
             </a>
         </div>
     </div>
