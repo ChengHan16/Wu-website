@@ -249,6 +249,15 @@
             .back-to-top { bottom: 15px; right: 15px; width: 40px; height: 40px; }
         }
     </style>
+    <script>
+        window.onload = function() {
+        window.scrollTo(0, 0); // X 座標 0, Y 座標 0
+        };
+        // 或使用 setTimeout 延遲一點點，避免與瀏覽器預載入衝突
+        setTimeout(function() {
+            window.scrollTo(0, 0);
+        }, 100);
+    </script>
 </head>
 <body>
 
