@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>帳號管理系統 - 來點子站前旅店</title>
+<title>帳號管理系統 - 來點子站前旅店 (初始建置版)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -48,12 +48,17 @@
 <div class="header">
     <div class="header-left">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCImo3zo7iCeo1quGZKt4c0GTrh_uSg3mSfQ&s" class="logo">
-        <div class="hotel-name">帳號管理系統</div>
+        <div class="hotel-name">帳號管理系統 (初始建置)</div>
     </div>
-    <a href="dashboard.html" class="nav-btn">返回房況系統</a>
+    <a href="login.html" class="nav-btn">前往登入畫面</a>
 </div>
 
 <div class="container">
+    <div class="card" style="background-color: #fffbeb; border-color: #fcd34d;">
+        <h4 style="margin:0 0 10px 0; color: #b45309;">💡 系統提示</h4>
+        <p style="margin:0; font-size:14px; color: #92400e;">此為「免登入初始版」。請在此建立您的第一組管理員帳號後，點擊右上角前往登入畫面進入主系統。</p>
+    </div>
+
     <div class="card">
         <h3>➕ 新增使用者帳號</h3>
         <div class="form-grid">
@@ -96,21 +101,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 權限防護：只有登入後才能進入這頁
-if(sessionStorage.getItem("isLoggedIn") !== "true") {
-    alert("請先登入系統！");
-    window.location.href = "login.html";
-}
+// 💡 已經為您移除登入檢查防護牆，讓您可以直接操作資料庫建立初始帳號
 
 window.loadUsers = async function() {
     const tbody = document.getElementById("userTableBody");
-    tbody.innerHTML = "";
+    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>資料讀取中...</td></tr>";
     try {
         const querySnapshot = await getDocs(collection(db, "admin_users"));
         if(querySnapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>尚無自訂帳號，請新增。</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>資料庫尚無帳號，請建立第一組帳號。</td></tr>";
             return;
         }
+        tbody.innerHTML = "";
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             tbody.innerHTML += `
@@ -124,7 +126,7 @@ window.loadUsers = async function() {
         });
     } catch (e) {
         console.error(e);
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>讀取失敗</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>讀取失敗，請檢查網路狀態</td></tr>";
     }
 }
 
@@ -137,14 +139,20 @@ window.createUser = async function() {
     if(!user || !pass || !name) { alert("請填寫所有欄位！"); return; }
     
     try {
+        // 將帳號寫入 Firebase admin_users 集合
         await setDoc(doc(db, "admin_users", user), { password: pass, name: name, role: role });
         alert("✅ 帳號建立成功！");
+        
+        // 清空輸入框
         document.getElementById("newUsername").value = "";
         document.getElementById("newPassword").value = "";
         document.getElementById("newName").value = "";
+        
+        // 重新載入列表
         loadUsers();
     } catch(e) {
-        alert("建立失敗，請檢查網路連線！");
+        alert("建立失敗，請檢查網路連線或 Firebase 權限！");
+        console.error(e);
     }
 }
 
@@ -153,10 +161,14 @@ window.deleteUser = async function(userId) {
         try {
             await deleteDoc(doc(db, "admin_users", userId));
             loadUsers();
-        } catch(e) { alert("刪除失敗！"); }
+        } catch(e) { 
+            alert("刪除失敗！"); 
+            console.error(e);
+        }
     }
 }
 
+// 畫面載入時自動讀取清單
 loadUsers();
 </script>
 </body>
