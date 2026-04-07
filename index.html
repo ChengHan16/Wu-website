@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>帳號管理系統 - 來點子站前旅店</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-dark: #163450;      
+        --primary-gold: #c1a13a;      
+        --bg-light: #f8fafc;          
+        --border-color: #e2e8f0;      
+    }
+    * { box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; }
+    body { margin: 0; background-color: var(--bg-light); color: #334155; }
+
+    .header { background-color: var(--primary-dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .header-left { display: flex; align-items: center; }
+    .logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; border: 2px solid var(--primary-gold); }
+    .hotel-name { font-size: 1.1rem; font-weight: 700; color: var(--primary-gold); }
+    
+    .nav-btn { background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
+    .nav-btn:hover { background: var(--primary-gold); color: var(--primary-dark); }
+
+    .container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
+
+    .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
+    h3 { margin-top: 0; color: var(--primary-dark); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    @media(max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    
+    .form-group label { display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 6px; font-weight: 600; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
+    .form-group input:focus { outline: none; border-color: var(--primary-gold); }
+
+    .btn-submit { background: var(--primary-dark); color: var(--primary-gold); border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+
+    .user-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .user-table th { background: var(--bg-light); color: var(--primary-dark); }
+    .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCImo3zo7iCeo1quGZKt4c0GTrh_uSg3mSfQ&s" class="logo">
+        <div class="hotel-name">帳號管理系統</div>
+    </div>
+    <a href="dashboard.html" class="nav-btn">返回房況系統</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h3>➕ 新增使用者帳號</h3>
+        <div class="form-grid">
+            <div class="form-group"><label>登入帳號 (英文/數字)</label><input type="text" id="newUsername" placeholder="例: counter01"></div>
+            <div class="form-group"><label>登入密碼</label><input type="text" id="newPassword" placeholder="請設定密碼"></div>
+            <div class="form-group"><label>員工姓名</label><input type="text" id="newName" placeholder="例: 王大明"></div>
+            <div class="form-group"><label>權限角色</label>
+                <select id="newRole">
+                    <option value="櫃檯人員">櫃檯人員</option>
+                    <option value="管理員">管理員</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-submit" onclick="createUser()">建立帳號</button>
+    </div>
+
+    <div class="card" style="overflow-x: auto;">
+        <h3>👥 現有帳號列表</h3>
+        <table class="user-table">
+            <thead><tr><th>登入帳號</th><th>員工姓名</th><th>權限角色</th><th>操作</th></tr></thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="4" style="text-align:center;">載入中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCde1T_hHZOm7__3-1qcQ_NAeAbkz5MdFc",
+    authDomain: "lightnessgogo-2d757.firebaseapp.com",
+    projectId: "lightnessgogo-2d757",
+    storageBucket: "lightnessgogo-2d757.firebasestorage.app",
+    messagingSenderId: "1033105975068",
+    appId: "1:1033105975068:web:915882758685a0d668bcd9",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 權限防護：只有登入後才能進入這頁
+if(sessionStorage.getItem("isLoggedIn") !== "true") {
+    alert("請先登入系統！");
+    window.location.href = "login.html";
+}
+
+window.loadUsers = async function() {
+    const tbody = document.getElementById("userTableBody");
+    tbody.innerHTML = "";
+    try {
+        const querySnapshot = await getDocs(collection(db, "admin_users"));
+        if(querySnapshot.empty) {
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>尚無自訂帳號，請新增。</td></tr>";
+            return;
+        }
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${doc.id}</b></td>
+                    <td>${data.name}</td>
+                    <td>${data.role}</td>
+                    <td><button class="btn-delete" onclick="deleteUser('${doc.id}')">刪除</button></td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>讀取失敗</td></tr>";
+    }
+}
+
+window.createUser = async function() {
+    const user = document.getElementById("newUsername").value.trim();
+    const pass = document.getElementById("newPassword").value.trim();
+    const name = document.getElementById("newName").value.trim();
+    const role = document.getElementById("newRole").value;
+
+    if(!user || !pass || !name) { alert("請填寫所有欄位！"); return; }
+    
+    try {
+        await setDoc(doc(db, "admin_users", user), { password: pass, name: name, role: role });
+        alert("✅ 帳號建立成功！");
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("newName").value = "";
+        loadUsers();
+    } catch(e) {
+        alert("建立失敗，請檢查網路連線！");
+    }
+}
+
+window.deleteUser = async function(userId) {
+    if(confirm(`確定要刪除帳號 [ ${userId} ] 嗎？`)) {
+        try {
+            await deleteDoc(doc(db, "admin_users", userId));
+            loadUsers();
+        } catch(e) { alert("刪除失敗！"); }
+    }
+}
+
+loadUsers();
+</script>
+</body>
+</html>
