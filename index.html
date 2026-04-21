@@ -21,7 +21,7 @@
             margin-top: 10px;
             font-weight: bold;
             color: #d9534f;
-            word-break: break-all; /* 讓過長的錯誤訊息可以自動換行 */
+            word-break: break-all;
         }
         /* 圖片與圖層容器 */
         #container {
@@ -66,7 +66,7 @@
         <h2>🔒 完全離線 - 文件掃描翻譯與編輯</h2>
         <p>所有圖片與文字皆在您的瀏覽器內處理，不會上傳至任何伺服器。</p>
         <input type="file" id="upload" accept="image/*" disabled>
-        <div id="status">狀態：正在載入 AI 翻譯模型 (首次載入需下載數十 MB，請稍候)...</div>
+        <div id="status">狀態：準備連接模型伺服器...</div>
     </div>
 
     <div id="container">
@@ -76,10 +76,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
-        <script type="module">
+    <script type="module">
         import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
 
-        // 關閉本地 Node.js 檔案系統讀取，強制在瀏覽器內從 Hugging Face 下載模型快取
+        // 強制在瀏覽器內從 Hugging Face 下載模型快取
         env.allowLocalModels = false;
 
         const uploadInput = document.getElementById('upload');
@@ -89,16 +89,28 @@
 
         let translator = null;
 
-        // 【修正點 1】改用真實存在的 NLLB 多國語言翻譯模型
+        // 載入模型並顯示進度
         async function loadModel() {
             try {
-                statusDiv.innerText = "狀態：正在下載 NLLB 翻譯模型 (約 240MB，第一次載入需較長時間，請保持網頁開啟)...";
-                translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M');
+                translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M', {
+                    // 加入進度回傳功能
+                    progress_callback: (data) => {
+                        if (data.status === 'progress') {
+                            const percent = Math.round((data.loaded / data.total) * 100);
+                            statusDiv.innerText = `狀態：⬇️ 模型下載中 (${data.file}) ... ${percent}%`;
+                            statusDiv.style.color = "#007bff";
+                        } else if (data.status === 'ready') {
+                            statusDiv.innerText = `狀態：⚙️ 檔案下載完畢，正在載入記憶體...`;
+                        }
+                    }
+                });
+
                 statusDiv.innerText = "狀態：✅ 翻譯模型載入完成！請上傳您要翻譯的圖片。";
                 statusDiv.style.color = "#28a745";
                 uploadInput.disabled = false;
             } catch (error) {
                 statusDiv.innerText = "狀態：❌ 載入失敗。錯誤細節：" + (error.message || error.toString());
+                statusDiv.style.color = "#d9534f";
                 console.error(error);
             }
         }
@@ -137,10 +149,10 @@
 
                         let translatedText = text;
                         if (translator) {
-                            // 【修正點 2】必須指定來源語言 (日文) 與目標語言 (繁體中文)
+                            // 指定來源為日文，目標為繁體中文
                             const result = await translator(text, {
-                                src_lang: 'jpn_Jpan', // 日文
-                                tgt_lang: 'zho_Hant'  // 繁體中文 (簡體中文可用 zho_Hans)
+                                src_lang: 'jpn_Jpan',
+                                tgt_lang: 'zho_Hant'
                             });
                             translatedText = result[0].translation_text;
                         }
@@ -170,6 +182,5 @@
             };
         });
     </script>
-
 </body>
 </html>
