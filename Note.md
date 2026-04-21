@@ -1,0 +1,189 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>端側離線文件翻譯工具 (PoC)</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 15px;
+            background-color: #f4f4f9;
+        }
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d9534f;
+            word-break: break-all;
+        }
+        /* 圖片與圖層容器 */
+        #container {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #ccc;
+            background-color: white;
+            max-width: 100%; /* 確保容器不會超出手機螢幕 */
+        }
+        /* 保持原圖比例，避免 OCR 座標錯位 */
+        #source-image {
+            display: block;
+            max-width: 100%; /* 圖片自適應手機寬度 */
+            height: auto;
+        }
+        /* 覆蓋在圖片上的可編輯翻譯文字框 */
+        .translated-text {
+            position: absolute;
+            background-color: white; /* 蓋住原圖語言 */
+            border: 1px dashed #007bff;
+            padding: 2px;
+            box-sizing: border-box;
+            font-size: 12px;
+            line-height: 1.2;
+            color: #333;
+            overflow: hidden;
+            cursor: text; /* 提示使用者可點擊編輯 */
+            word-wrap: break-word;
+        }
+        .translated-text:focus {
+            border: 2px solid #28a745;
+            outline: none;
+            z-index: 10;
+            background-color: #fffde7; /* 編輯時背景變黃提示 */
+            overflow: visible;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <h2>🔒 完全離線 - 文件掃描翻譯與編輯</h2>
+        <p>所有圖片與文字皆在您的瀏覽器內處理，不會上傳至任何伺服器。</p>
+        <input type="file" id="upload" accept="image/*" disabled>
+        <div id="status">狀態：準備連接模型伺服器...</div>
+    </div>
+
+    <div id="container">
+        <img id="source-image" src="" alt="" style="display:none;">
+        <div id="overlay-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
+
+        // 強制在瀏覽器內從 Hugging Face 下載模型快取
+        env.allowLocalModels = false;
+
+        const uploadInput = document.getElementById('upload');
+        const sourceImage = document.getElementById('source-image');
+        const overlayContainer = document.getElementById('overlay-container');
+        const statusDiv = document.getElementById('status');
+
+        let translator = null;
+
+        // 載入模型並顯示進度
+        async function loadModel() {
+            try {
+                translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M', {
+                    // 加入進度回傳功能
+                    progress_callback: (data) => {
+                        if (data.status === 'progress') {
+                            const percent = Math.round((data.loaded / data.total) * 100);
+                            statusDiv.innerText = `狀態：⬇️ 模型下載中 (${data.file}) ... ${percent}%`;
+                            statusDiv.style.color = "#007bff";
+                        } else if (data.status === 'ready') {
+                            statusDiv.innerText = `狀態：⚙️ 檔案下載完畢，正在載入記憶體...`;
+                        }
+                    }
+                });
+
+                statusDiv.innerText = "狀態：✅ 翻譯模型載入完成！請上傳您要翻譯的圖片。";
+                statusDiv.style.color = "#28a745";
+                uploadInput.disabled = false;
+            } catch (error) {
+                statusDiv.innerText = "狀態：❌ 載入失敗。錯誤細節：" + (error.message || error.toString());
+                statusDiv.style.color = "#d9534f";
+                console.error(error);
+            }
+        }
+
+        loadModel();
+
+        // 監聽圖片上傳事件
+        uploadInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            overlayContainer.innerHTML = '';
+            const imageUrl = URL.createObjectURL(file);
+            sourceImage.src = imageUrl;
+            sourceImage.style.display = 'block';
+
+            sourceImage.onload = async () => {
+                statusDiv.innerText = "狀態：🔍 正在進行 OCR 日文辨識 (請稍候)...";
+                statusDiv.style.color = "#007bff";
+
+                try {
+                    const worker = await Tesseract.createWorker('jpn');
+                    const ret = await worker.recognize(imageUrl);
+                    const lines = ret.data.lines;
+                    await worker.terminate();
+
+                    statusDiv.innerText = `狀態：🧠 OCR 完成，共找到 ${lines.length} 行文字。正在進行 AI 翻譯...`;
+
+                    const scaleX = sourceImage.clientWidth / sourceImage.naturalWidth;
+                    const scaleY = sourceImage.clientHeight / sourceImage.naturalHeight;
+
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        const text = line.text.trim();
+                        if (!text) continue;
+
+                        let translatedText = text;
+                        if (translator) {
+                            // 指定來源為日文，目標為繁體中文
+                            const result = await translator(text, {
+                                src_lang: 'jpn_Jpan',
+                                tgt_lang: 'zho_Hant'
+                            });
+                            translatedText = result[0].translation_text;
+                        }
+
+                        const bbox = line.bbox; 
+                        const div = document.createElement('div');
+                        div.className = 'translated-text';
+                        div.contentEditable = true;
+                        div.innerText = translatedText;
+
+                        div.style.left = `${bbox.x0 * scaleX}px`;
+                        div.style.top = `${bbox.y0 * scaleY}px`;
+                        div.style.width = `${(bbox.x1 - bbox.x0) * scaleX}px`;
+                        div.style.height = `${(bbox.y1 - bbox.y0) * scaleY}px`;
+
+                        overlayContainer.appendChild(div);
+                    }
+
+                    statusDiv.innerText = "狀態：🎉 處理完成！您可以直接點擊圖片上的文字方塊進行修改編輯。";
+                    statusDiv.style.color = "#28a745";
+
+                } catch (error) {
+                    statusDiv.innerText = "狀態：❌ 處理過程中發生錯誤：" + (error.message || error.toString());
+                    statusDiv.style.color = "#d9534f";
+                    console.error(error);
+                }
+            };
+        });
+    </script>
+</body>
+</html>
+
+```
