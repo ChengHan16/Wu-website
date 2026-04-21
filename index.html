@@ -3,184 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>端側離線文件翻譯工具 (PoC)</title>
+    <title>加密通訊實作指南：CIA 要素與雙重實務教學</title>
     <style>
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            padding: 15px;
-            background-color: #f4f4f9;
-        }
-        .control-panel {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        #status {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #d9534f;
-            word-break: break-all;
-        }
-        /* 圖片與圖層容器 */
-        #container {
-            position: relative;
-            display: inline-block;
-            border: 1px solid #ccc;
-            background-color: white;
-            max-width: 100%; /* 確保容器不會超出手機螢幕 */
-        }
-        /* 保持原圖比例，避免 OCR 座標錯位 */
-        #source-image {
-            display: block;
-            max-width: 100%; /* 圖片自適應手機寬度 */
-            height: auto;
-        }
-        /* 覆蓋在圖片上的可編輯翻譯文字框 */
-        .translated-text {
-            position: absolute;
-            background-color: white; /* 蓋住原圖語言 */
-            border: 1px dashed #007bff;
-            padding: 2px;
-            box-sizing: border-box;
-            font-size: 12px;
-            line-height: 1.2;
-            color: #333;
-            overflow: hidden;
-            cursor: text; /* 提示使用者可點擊編輯 */
-            word-wrap: break-word;
-        }
-        .translated-text:focus {
-            border: 2px solid #28a745;
-            outline: none;
-            z-index: 10;
-            background-color: #fffde7; /* 編輯時背景變黃提示 */
-            overflow: visible;
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 20px auto; padding: 20px; background-color: #fcfcfc; }
+        h1 { border-bottom: 3px solid #2c3e50; padding-bottom: 10px; color: #2c3e50; text-align: center; }
+        h2 { border-left: 6px solid #e67e22; padding-left: 12px; margin-top: 30px; color: #d35400; background: #fff5eb; padding-top: 5px; padding-bottom: 5px; }
+        
+        .no-print { background: #eef2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #d1d9e6; text-align: center; }
+        button { background: #2c3e50; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        
+        /* 強制分頁控制 */
+        .page-break { page-break-before: always; }
+
+        /* CIA & 準則樣式 */
+        .principles { border: 2px solid #2c3e50; padding: 25px; background: #fff; margin-bottom: 20px; border-radius: 5px; }
+        .cia-section { margin: 20px 0; }
+        .cia-item { margin-bottom: 15px; padding: 15px; border-left: 5px solid #2980b9; background: #f9f9f9; }
+        .cia-item strong { font-size: 18px; color: #2c3e50; display: block; margin-bottom: 5px; }
+
+        /* 表格樣式 */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; background: #fff; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; font-family: monospace; font-size: 15px; }
+        th { background-color: #f2f2f2; }
+        .highlight-row { background-color: #fff9db; font-weight: bold; color: #d9480f; }
+        
+        .example-box { border: 1px solid #bdc3c7; padding: 15px; margin-bottom: 20px; background: #fdfdfd; border-left: 5px solid #2ecc71; page-break-inside: avoid; }
+        
+        /* 完美對齊表格 */
+        .align-table { display: inline-table; border-collapse: collapse; font-family: monospace; font-size: 18px; margin: 10px 0; }
+        .align-table td { border: none; padding: 2px 10px; text-align: center; }
+        .border-top { border-top: 2px solid #333 !important; }
+
+        .code-grid { font-family: 'Courier New', monospace; letter-spacing: 2px; border: 1px solid #000; padding: 15px; font-size: 18px; background: #fff; line-height: 1.8; }
+
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; padding: 0; background-color: white; }
         }
     </style>
 </head>
 <body>
 
-    <div class="control-panel">
-        <h2>🔒 完全離線 - 文件掃描翻譯與編輯</h2>
-        <p>所有圖片與文字皆在您的瀏覽器內處理，不會上傳至任何伺服器。</p>
-        <input type="file" id="upload" accept="image/*" disabled>
-        <div id="status">狀態：準備連接模型伺服器...</div>
+    <div class="no-print">
+        <h1>🔐 通訊安全實作手冊</h1>
+        <p>本文件分為：資安理論、OTP 多重計算法、凱撒加密。請點擊列印並分頁保存。</p>
+        <button onclick="window.print()">點此列印完整手冊</button>
     </div>
 
-    <div id="container">
-        <img id="source-image" src="" alt="" style="display:none;">
-        <div id="overlay-container"></div>
+    <!-- 第一張：資安理論 -->
+    <div class="principles">
+        <h1>第一部分：資料安全核心與準則</h1>
+        <p>在建立通訊前，必須理解 CIA 資訊安全三要素，這是所有防禦體系的基石。</p>
+
+        <div class="cia-section">
+            <div class="cia-item">
+                <strong>1. 機密性 (Confidentiality)</strong>
+                確保只有授權者能讀取資訊。在 OTP 加密中，即使攔截者拿到數字串，沒有密鑰也無法還原真相。
+            </div>
+            <div class="cia-item">
+                <strong>2. 完整性 (Integrity)</strong>
+                確保資訊未遭篡改。若密文在傳輸中被改動，解密後的內容將失去邏輯（亂碼），藉此提醒通訊已遭破壞。
+            </div>
+            <div class="cia-item">
+                <strong>3. 可用性 (Availability)</strong>
+                確保授權者隨時能取用通訊工具。密碼本的物理備份與保護是維持可用性的關鍵。
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>🚨 離線加密操作準則</h2>
+        <ul>
+            <li><strong>一次性原則</strong>：隨機密鑰數字一旦完成加/解密，必須立即劃除，永不重複使用。</li>
+            <li><strong>物理保護</strong>：密碼本應視為實體機密。若失竊，機密性（C）將隨之瓦解。</li>
+            <li><strong>隔離運算</strong>：全程手工計算，嚴禁在聯網設備處理明文。</li>
+        </ul>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- 第二張：OTP 指南 (加入雙位數計算法) -->
+    <div class="page-break"></div>
+    <h1>第二部分：高強度 OTP 指南 (雙重計算法)</h1>
     
-    <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
+    <h2>1. 文字轉數字對照表</h2>
+    <table>
+        <tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th><th>J</th><th>K</th><th>L</th><th>M</th></tr>
+        <tr><td>01</td><td>02</td><td>03</td><td>04</td><td>05</td><td>06</td><td>07</td><td>08</td><td>09</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
+        <tr><th>N</th><th>O</th><th>P</th><th>Q</th><th>R</th><th>S</th><th>T</th><th>U</th><th>V</th><th>W</th><th>X</th><th>Y</th><th>Z</th></tr>
+        <tr><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+    </table>
 
-        // 強制在瀏覽器內從 Hugging Face 下載模型快取
-        env.allowLocalModels = false;
+    <h2>2. 方法 A：位元拆分法 (適合初學者)</h2>
+    <div class="example-box">
+        將雙位數拆開計算。例如：<strong>S (19)</strong> 拆成 <strong>1</strong> 與 <strong>9</strong>。
+        <br>
+        <strong>運算：</strong>垂直相加，超過 10 則不進位（只寫個位數）。
+        <br>
+        <table class="align-table">
+            <tr><td>明文 (S)</td><td>1</td><td>9</td></tr>
+            <tr><td>密鑰</td><td>8</td><td>4</td></tr>
+            <tr class="border-top"><td>密文</td><td>9</td><td>3</td></tr>
+        </table>
+        <small>*解密時：9-8=1, 3-4(借10)=9。還原 19 (S)。</small>
+    </div>
 
-        const uploadInput = document.getElementById('upload');
-        const sourceImage = document.getElementById('source-image');
-        const overlayContainer = document.getElementById('overlay-container');
-        const statusDiv = document.getElementById('status');
+    <h2>3. 方法 B：雙位數計算法 (適合進階者)</h2>
+    <div class="example-box" style="border-left-color: #f1c40f;">
+        不拆分數字，將 <strong>S (19)</strong> 視為一個整體進行運算。
+        <br>
+        <strong>運算：</strong>(明文數字 + 密鑰數字)，結果若大於 26 則減去 26。
+        <br>
+        <table class="align-table">
+            <tr><td>明文 (S)</td><td>19</td></tr>
+            <tr><td>密鑰</td><td>08</td></tr>
+            <tr class="border-top"><td>密文</td><td>01</td></tr>
+        </table>
+        <small>*計算：19 + 8 = 27，超過 26，故 27-26=01。發送密文 01 (A)。</small>
+        <br>
+        <strong>解密：</strong>(密文數字 - 密鑰數字)，結果若小於 1 則加上 26。
+    </div>
 
-        let translator = null;
+    <h3>4. 隨機密鑰區 (Page: 001)</h3>
+    <div class="code-grid">
+        72910 44821 00394 15822 90217<br>
+        33481 05629 11048 57239 88102<br>
+        49201 77345 61092 83746 55012
+    </div>
 
-        // 載入模型並顯示進度
-        async function loadModel() {
-            try {
-                translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M', {
-                    // 加入進度回傳功能
-                    progress_callback: (data) => {
-                        if (data.status === 'progress') {
-                            const percent = Math.round((data.loaded / data.total) * 100);
-                            statusDiv.innerText = `狀態：⬇️ 模型下載中 (${data.file}) ... ${percent}%`;
-                            statusDiv.style.color = "#007bff";
-                        } else if (data.status === 'ready') {
-                            statusDiv.innerText = `狀態：⚙️ 檔案下載完畢，正在載入記憶體...`;
-                        }
-                    }
-                });
+    <!-- 第三張：凱撒加密 -->
+    <div class="page-break"></div>
+    <h1>第三部分：凱撒加密法 (Caesar Cipher)</h1>
+    
+    <h2>1. 字母與數字位移對照 (+3)</h2>
+    <table>
+        <tr><th>明文</th><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td><td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td></tr>
+        <tr class="highlight-row"><th>密文</th><td>D</td><td>E</td><td>F</td><td>G</td><td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>O</td><td>P</td></tr>
+        <tr><td colspan="14" style="border:none; height:10px;"></td></tr>
+        <tr><th>明文</th><td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>U</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td></tr>
+        <tr class="highlight-row"><th>密文</th><td>Q</td><td>R</td><td>S</td><td>T</td><td>U</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td><td>A</td><td>B</td><td>C</td></tr>
+        <tr><td colspan="14" style="border:none; height:10px;"></td></tr>
+        <tr><th>數字</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td colspan="3">空格</td></tr>
+        <tr class="highlight-row"><th>密文</th><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>0</td><td>1</td><td>2</td><td colspan="3">-</td></tr>
+    </table>
 
-                statusDiv.innerText = "狀態：✅ 翻譯模型載入完成！請上傳您要翻譯的圖片。";
-                statusDiv.style.color = "#28a745";
-                uploadInput.disabled = false;
-            } catch (error) {
-                statusDiv.innerText = "狀態：❌ 載入失敗。錯誤細節：" + (error.message || error.toString());
-                statusDiv.style.color = "#d9534f";
-                console.error(error);
-            }
-        }
+    <div class="example-box" style="border-left-color: #e67e22;">
+        <strong>凱撒加密混合範例：</strong><br>
+        <table class="align-table">
+            <tr><td>明文</td><td>C</td><td>A</td><td>T</td><td>1</td><td>1</td><td>9</td></tr>
+            <tr class="border-top"><td>密文</td><td>F</td><td>D</td><td>W</td><td>4</td><td>4</td><td>2</td></tr>
+        </table>
+    </div>
 
-        loadModel();
+    <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #7f8c8d;">
+        注意：凱撒加密強度較低，建議僅用於日常非機密通訊或教學練習。
+    </div>
 
-        // 監聽圖片上傳事件
-        uploadInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            overlayContainer.innerHTML = '';
-            const imageUrl = URL.createObjectURL(file);
-            sourceImage.src = imageUrl;
-            sourceImage.style.display = 'block';
-
-            sourceImage.onload = async () => {
-                statusDiv.innerText = "狀態：🔍 正在進行 OCR 日文辨識 (請稍候)...";
-                statusDiv.style.color = "#007bff";
-
-                try {
-                    const worker = await Tesseract.createWorker('jpn');
-                    const ret = await worker.recognize(imageUrl);
-                    const lines = ret.data.lines;
-                    await worker.terminate();
-
-                    statusDiv.innerText = `狀態：🧠 OCR 完成，共找到 ${lines.length} 行文字。正在進行 AI 翻譯...`;
-
-                    const scaleX = sourceImage.clientWidth / sourceImage.naturalWidth;
-                    const scaleY = sourceImage.clientHeight / sourceImage.naturalHeight;
-
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i];
-                        const text = line.text.trim();
-                        if (!text) continue;
-
-                        let translatedText = text;
-                        if (translator) {
-                            // 指定來源為日文，目標為繁體中文
-                            const result = await translator(text, {
-                                src_lang: 'jpn_Jpan',
-                                tgt_lang: 'zho_Hant'
-                            });
-                            translatedText = result[0].translation_text;
-                        }
-
-                        const bbox = line.bbox; 
-                        const div = document.createElement('div');
-                        div.className = 'translated-text';
-                        div.contentEditable = true;
-                        div.innerText = translatedText;
-
-                        div.style.left = `${bbox.x0 * scaleX}px`;
-                        div.style.top = `${bbox.y0 * scaleY}px`;
-                        div.style.width = `${(bbox.x1 - bbox.x0) * scaleX}px`;
-                        div.style.height = `${(bbox.y1 - bbox.y0) * scaleY}px`;
-
-                        overlayContainer.appendChild(div);
-                    }
-
-                    statusDiv.innerText = "狀態：🎉 處理完成！您可以直接點擊圖片上的文字方塊進行修改編輯。";
-                    statusDiv.style.color = "#28a745";
-
-                } catch (error) {
-                    statusDiv.innerText = "狀態：❌ 處理過程中發生錯誤：" + (error.message || error.toString());
-                    statusDiv.style.color = "#d9534f";
-                    console.error(error);
-                }
-            };
-        });
-    </script>
 </body>
 </html>
