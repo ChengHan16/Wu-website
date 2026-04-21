@@ -1,176 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>帳號管理系統 - 來點子站前旅店 (初始建置版)</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-    :root {
-        --primary-dark: #163450;      
-        --primary-gold: #c1a13a;      
-        --bg-light: #f8fafc;          
-        --border-color: #e2e8f0;      
-    }
-    * { box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; }
-    body { margin: 0; background-color: var(--bg-light); color: #334155; }
-
-    .header { background-color: var(--primary-dark); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    .header-left { display: flex; align-items: center; }
-    .logo { width: 35px; height: 35px; border-radius: 8px; margin-right: 12px; border: 2px solid var(--primary-gold); }
-    .hotel-name { font-size: 1.1rem; font-weight: 700; color: var(--primary-gold); }
-    
-    .nav-btn { background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
-    .nav-btn:hover { background: var(--primary-gold); color: var(--primary-dark); }
-
-    .container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-
-    .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
-    h3 { margin-top: 0; color: var(--primary-dark); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; }
-
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-    @media(max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    
-    .form-group label { display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 6px; font-weight: 600; }
-    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
-    .form-group input:focus { outline: none; border-color: var(--primary-gold); }
-
-    .btn-submit { background: var(--primary-dark); color: var(--primary-gold); border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-
-    .user-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
-    .user-table th { background: var(--bg-light); color: var(--primary-dark); }
-    .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>端側離線文件翻譯工具 (PoC)</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+        /* 圖片與圖層容器 */
+        #container {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #ccc;
+            background-color: white;
+        }
+        /* 保持原圖比例，避免 OCR 座標錯位 */
+        #source-image {
+            display: block;
+        }
+        /* 覆蓋在圖片上的可編輯翻譯文字框 */
+        .translated-text {
+            position: absolute;
+            background-color: white; /* 蓋住原圖語言 */
+            border: 1px dashed #007bff;
+            padding: 2px;
+            box-sizing: border-box;
+            font-size: 14px;
+            line-height: 1.2;
+            color: #333;
+            overflow: hidden;
+            cursor: text; /* 提示使用者可點擊編輯 */
+            word-wrap: break-word;
+        }
+        .translated-text:focus {
+            border: 2px solid #28a745;
+            outline: none;
+            z-index: 10;
+            background-color: #fffde7; /* 編輯時背景變黃提示 */
+            overflow: visible;
+        }
+    </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-left">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCImo3zo7iCeo1quGZKt4c0GTrh_uSg3mSfQ&s" class="logo">
-        <div class="hotel-name">帳號管理系統 (初始建置)</div>
-    </div>
-    <a href="login.html" class="nav-btn">前往登入畫面</a>
-</div>
-
-<div class="container">
-    <div class="card" style="background-color: #fffbeb; border-color: #fcd34d;">
-        <h4 style="margin:0 0 10px 0; color: #b45309;">💡 系統提示</h4>
-        <p style="margin:0; font-size:14px; color: #92400e;">此為「免登入初始版」。請在此建立您的第一組管理員帳號後，點擊右上角前往登入畫面進入主系統。</p>
+    <div class="control-panel">
+        <h2>🔒 完全離線 - 文件掃描翻譯與編輯</h2>
+        <p>所有圖片與文字皆在您的瀏覽器內處理，不會上傳至任何伺服器。</p>
+        <input type="file" id="upload" accept="image/*" disabled>
+        <div id="status">狀態：正在載入 AI 翻譯模型 (首次載入需下載數十 MB，請稍候)...</div>
     </div>
 
-    <div class="card">
-        <h3>➕ 新增使用者帳號</h3>
-        <div class="form-grid">
-            <div class="form-group"><label>登入帳號 (英文/數字)</label><input type="text" id="newUsername" placeholder="例: counter01"></div>
-            <div class="form-group"><label>登入密碼</label><input type="text" id="newPassword" placeholder="請設定密碼"></div>
-            <div class="form-group"><label>員工姓名</label><input type="text" id="newName" placeholder="例: 王大明"></div>
-            <div class="form-group"><label>權限角色</label>
-                <select id="newRole">
-                    <option value="櫃檯人員">櫃檯人員</option>
-                    <option value="管理員">管理員</option>
-                </select>
-            </div>
-        </div>
-        <button class="btn-submit" onclick="createUser()">建立帳號</button>
+    <div id="container">
+        <img id="source-image" src="" alt="" style="display:none;">
+        <div id="overlay-container"></div>
     </div>
 
-    <div class="card" style="overflow-x: auto;">
-        <h3>👥 現有帳號列表</h3>
-        <table class="user-table">
-            <thead><tr><th>登入帳號</th><th>員工姓名</th><th>權限角色</th><th>操作</th></tr></thead>
-            <tbody id="userTableBody">
-                <tr><td colspan="4" style="text-align:center;">載入中...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCde1T_hHZOm7__3-1qcQ_NAeAbkz5MdFc",
-    authDomain: "lightnessgogo-2d757.firebaseapp.com",
-    projectId: "lightnessgogo-2d757",
-    storageBucket: "lightnessgogo-2d757.firebasestorage.app",
-    messagingSenderId: "1033105975068",
-    appId: "1:1033105975068:web:915882758685a0d668bcd9",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// 💡 已經為您移除登入檢查防護牆，讓您可以直接操作資料庫建立初始帳號
-
-window.loadUsers = async function() {
-    const tbody = document.getElementById("userTableBody");
-    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>資料讀取中...</td></tr>";
-    try {
-        const querySnapshot = await getDocs(collection(db, "admin_users"));
-        if(querySnapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>資料庫尚無帳號，請建立第一組帳號。</td></tr>";
-            return;
-        }
-        tbody.innerHTML = "";
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${doc.id}</b></td>
-                    <td>${data.name}</td>
-                    <td>${data.role}</td>
-                    <td><button class="btn-delete" onclick="deleteUser('${doc.id}')">刪除</button></td>
-                </tr>
-            `;
-        });
-    } catch (e) {
-        console.error(e);
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>讀取失敗，請檢查網路狀態</td></tr>";
-    }
-}
-
-window.createUser = async function() {
-    const user = document.getElementById("newUsername").value.trim();
-    const pass = document.getElementById("newPassword").value.trim();
-    const name = document.getElementById("newName").value.trim();
-    const role = document.getElementById("newRole").value;
-
-    if(!user || !pass || !name) { alert("請填寫所有欄位！"); return; }
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
-    try {
-        // 將帳號寫入 Firebase admin_users 集合
-        await setDoc(doc(db, "admin_users", user), { password: pass, name: name, role: role });
-        alert("✅ 帳號建立成功！");
-        
-        // 清空輸入框
-        document.getElementById("newUsername").value = "";
-        document.getElementById("newPassword").value = "";
-        document.getElementById("newName").value = "";
-        
-        // 重新載入列表
-        loadUsers();
-    } catch(e) {
-        alert("建立失敗，請檢查網路連線或 Firebase 權限！");
-        console.error(e);
-    }
-}
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
 
-window.deleteUser = async function(userId) {
-    if(confirm(`確定要刪除帳號 [ ${userId} ] 嗎？`)) {
-        try {
-            await deleteDoc(doc(db, "admin_users", userId));
-            loadUsers();
-        } catch(e) { 
-            alert("刪除失敗！"); 
-            console.error(e);
+        // 關閉本地 Node.js 檔案系統讀取，強制在瀏覽器內從 Hugging Face 下載模型快取
+        env.allowLocalModels = false;
+
+        const uploadInput = document.getElementById('upload');
+        const sourceImage = document.getElementById('source-image');
+        const overlayContainer = document.getElementById('overlay-container');
+        const statusDiv = document.getElementById('status');
+
+        let translator = null;
+
+        // 載入日翻中的 AI 模型 (使用較輕量的 Opus-MT 模型作為示範)
+        async function loadModel() {
+            try {
+                translator = await pipeline('translation', 'Xenova/opus-mt-ja-zh');
+                statusDiv.innerText = "狀態：✅ 翻譯模型載入完成！請上傳您要翻譯的圖片。";
+                statusDiv.style.color = "#28a745";
+                uploadInput.disabled = false; // 模型載入完畢才允許上傳
+            } catch (error) {
+                statusDiv.innerText = "狀態：❌ 翻譯模型載入失敗，請檢查網路連線。";
+                console.error(error);
+            }
         }
-    }
-}
 
-// 畫面載入時自動讀取清單
-loadUsers();
-</script>
+        loadModel();
+
+        // 監聽圖片上傳事件
+        uploadInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 清空畫面與重置狀態
+            overlayContainer.innerHTML = '';
+            const imageUrl = URL.createObjectURL(file);
+            sourceImage.src = imageUrl;
+            sourceImage.style.display = 'block';
+
+            // 等待圖片渲染完畢，才能取得正確寬高座標
+            sourceImage.onload = async () => {
+                statusDiv.innerText = "狀態：🔍 正在進行 OCR 日文辨識 (請稍候)...";
+                statusDiv.style.color = "#007bff";
+
+                try {
+                    // 執行 OCR (辨識日文 'jpn')
+                    const worker = await Tesseract.createWorker('jpn');
+                    const ret = await worker.recognize(imageUrl);
+                    const lines = ret.data.lines; // 取得辨識出的每一行文字
+                    await worker.terminate();
+
+                    statusDiv.innerText = `狀態：🧠 OCR 完成，共找到 ${lines.length} 行文字。正在進行 AI 翻譯...`;
+
+                    // 處理每一行文字
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        const text = line.text.trim();
+                        if (!text) continue;
+
+                        // 執行端側翻譯
+                        let translatedText = text;
+                        if (translator) {
+                            const result = await translator(text);
+                            translatedText = result[0].translation_text;
+                        }
+
+                        // 建立 HTML 覆蓋圖層 (Overlay)
+                        const bbox = line.bbox; // 取得文字的邊界框 {x0, y0, x1, y1}
+                        const div = document.createElement('div');
+                        div.className = 'translated-text';
+                        div.contentEditable = true; // ✨ 讓使用者可以點擊修改
+                        div.innerText = translatedText;
+
+                        // 設定精準座標以覆蓋原圖文字
+                        div.style.left = `${bbox.x0}px`;
+                        div.style.top = `${bbox.y0}px`;
+                        div.style.width = `${bbox.x1 - bbox.x0}px`;
+                        div.style.height = `${bbox.y1 - bbox.y0}px`;
+
+                        overlayContainer.appendChild(div);
+                    }
+
+                    statusDiv.innerText = "狀態：🎉 處理完成！您可以直接點擊圖片上的文字方塊進行修改編輯。";
+                    statusDiv.style.color = "#28a745";
+
+                } catch (error) {
+                    statusDiv.innerText = "狀態：❌ 處理過程中發生錯誤。";
+                    console.error(error);
+                }
+            };
+        });
+    </script>
 </body>
 </html>
-
