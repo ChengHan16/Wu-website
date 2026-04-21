@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
+            padding: 15px;
             background-color: #f4f4f9;
         }
         .control-panel {
@@ -21,6 +21,7 @@
             margin-top: 10px;
             font-weight: bold;
             color: #d9534f;
+            word-break: break-all; /* 讓過長的錯誤訊息可以自動換行 */
         }
         /* 圖片與圖層容器 */
         #container {
@@ -28,10 +29,13 @@
             display: inline-block;
             border: 1px solid #ccc;
             background-color: white;
+            max-width: 100%; /* 確保容器不會超出手機螢幕 */
         }
         /* 保持原圖比例，避免 OCR 座標錯位 */
         #source-image {
             display: block;
+            max-width: 100%; /* 圖片自適應手機寬度 */
+            height: auto;
         }
         /* 覆蓋在圖片上的可編輯翻譯文字框 */
         .translated-text {
@@ -40,7 +44,7 @@
             border: 1px dashed #007bff;
             padding: 2px;
             box-sizing: border-box;
-            font-size: 14px;
+            font-size: 12px;
             line-height: 1.2;
             color: #333;
             overflow: hidden;
@@ -85,7 +89,7 @@
 
         let translator = null;
 
-        // 載入日翻中的 AI 模型 (使用較輕量的 Opus-MT 模型作為示範)
+        // 載入日翻中的 AI 模型
         async function loadModel() {
             try {
                 translator = await pipeline('translation', 'Xenova/opus-mt-ja-zh');
@@ -93,7 +97,8 @@
                 statusDiv.style.color = "#28a745";
                 uploadInput.disabled = false; // 模型載入完畢才允許上傳
             } catch (error) {
-                statusDiv.innerText = "狀態：❌ 翻譯模型載入失敗，請檢查網路連線。";
+                // 將錯誤細節顯示在畫面上，方便手機除錯
+                statusDiv.innerText = "狀態：❌ 載入失敗。錯誤細節：" + (error.message || error.toString());
                 console.error(error);
             }
         }
@@ -125,6 +130,10 @@
 
                     statusDiv.innerText = `狀態：🧠 OCR 完成，共找到 ${lines.length} 行文字。正在進行 AI 翻譯...`;
 
+                    // 計算手機上的縮放比例
+                    const scaleX = sourceImage.clientWidth / sourceImage.naturalWidth;
+                    const scaleY = sourceImage.clientHeight / sourceImage.naturalHeight;
+
                     // 處理每一行文字
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
@@ -139,17 +148,17 @@
                         }
 
                         // 建立 HTML 覆蓋圖層 (Overlay)
-                        const bbox = line.bbox; // 取得文字的邊界框 {x0, y0, x1, y1}
+                        const bbox = line.bbox; 
                         const div = document.createElement('div');
                         div.className = 'translated-text';
-                        div.contentEditable = true; // ✨ 讓使用者可以點擊修改
+                        div.contentEditable = true; // 讓使用者可以點擊修改
                         div.innerText = translatedText;
 
-                        // 設定精準座標以覆蓋原圖文字
-                        div.style.left = `${bbox.x0}px`;
-                        div.style.top = `${bbox.y0}px`;
-                        div.style.width = `${bbox.x1 - bbox.x0}px`;
-                        div.style.height = `${bbox.y1 - bbox.y0}px`;
+                        // 設定精準座標 (配合縮放比例)
+                        div.style.left = `${bbox.x0 * scaleX}px`;
+                        div.style.top = `${bbox.y0 * scaleY}px`;
+                        div.style.width = `${(bbox.x1 - bbox.x0) * scaleX}px`;
+                        div.style.height = `${(bbox.y1 - bbox.y0) * scaleY}px`;
 
                         overlayContainer.appendChild(div);
                     }
@@ -158,7 +167,8 @@
                     statusDiv.style.color = "#28a745";
 
                 } catch (error) {
-                    statusDiv.innerText = "狀態：❌ 處理過程中發生錯誤。";
+                    statusDiv.innerText = "狀態：❌ 處理過程中發生錯誤：" + (error.message || error.toString());
+                    statusDiv.style.color = "#d9534f";
                     console.error(error);
                 }
             };
