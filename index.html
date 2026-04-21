@@ -76,7 +76,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
-    <script type="module">
+        <script type="module">
         import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0';
 
         // 關閉本地 Node.js 檔案系統讀取，強制在瀏覽器內從 Hugging Face 下載模型快取
@@ -89,15 +89,15 @@
 
         let translator = null;
 
-        // 載入日翻中的 AI 模型
+        // 【修正點 1】改用真實存在的 NLLB 多國語言翻譯模型
         async function loadModel() {
             try {
-                translator = await pipeline('translation', 'Xenova/opus-mt-ja-zh');
+                statusDiv.innerText = "狀態：正在下載 NLLB 翻譯模型 (約 240MB，第一次載入需較長時間，請保持網頁開啟)...";
+                translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M');
                 statusDiv.innerText = "狀態：✅ 翻譯模型載入完成！請上傳您要翻譯的圖片。";
                 statusDiv.style.color = "#28a745";
-                uploadInput.disabled = false; // 模型載入完畢才允許上傳
+                uploadInput.disabled = false;
             } catch (error) {
-                // 將錯誤細節顯示在畫面上，方便手機除錯
                 statusDiv.innerText = "狀態：❌ 載入失敗。錯誤細節：" + (error.message || error.toString());
                 console.error(error);
             }
@@ -110,51 +110,47 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            // 清空畫面與重置狀態
             overlayContainer.innerHTML = '';
             const imageUrl = URL.createObjectURL(file);
             sourceImage.src = imageUrl;
             sourceImage.style.display = 'block';
 
-            // 等待圖片渲染完畢，才能取得正確寬高座標
             sourceImage.onload = async () => {
                 statusDiv.innerText = "狀態：🔍 正在進行 OCR 日文辨識 (請稍候)...";
                 statusDiv.style.color = "#007bff";
 
                 try {
-                    // 執行 OCR (辨識日文 'jpn')
                     const worker = await Tesseract.createWorker('jpn');
                     const ret = await worker.recognize(imageUrl);
-                    const lines = ret.data.lines; // 取得辨識出的每一行文字
+                    const lines = ret.data.lines;
                     await worker.terminate();
 
                     statusDiv.innerText = `狀態：🧠 OCR 完成，共找到 ${lines.length} 行文字。正在進行 AI 翻譯...`;
 
-                    // 計算手機上的縮放比例
                     const scaleX = sourceImage.clientWidth / sourceImage.naturalWidth;
                     const scaleY = sourceImage.clientHeight / sourceImage.naturalHeight;
 
-                    // 處理每一行文字
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
                         const text = line.text.trim();
                         if (!text) continue;
 
-                        // 執行端側翻譯
                         let translatedText = text;
                         if (translator) {
-                            const result = await translator(text);
+                            // 【修正點 2】必須指定來源語言 (日文) 與目標語言 (繁體中文)
+                            const result = await translator(text, {
+                                src_lang: 'jpn_Jpan', // 日文
+                                tgt_lang: 'zho_Hant'  // 繁體中文 (簡體中文可用 zho_Hans)
+                            });
                             translatedText = result[0].translation_text;
                         }
 
-                        // 建立 HTML 覆蓋圖層 (Overlay)
                         const bbox = line.bbox; 
                         const div = document.createElement('div');
                         div.className = 'translated-text';
-                        div.contentEditable = true; // 讓使用者可以點擊修改
+                        div.contentEditable = true;
                         div.innerText = translatedText;
 
-                        // 設定精準座標 (配合縮放比例)
                         div.style.left = `${bbox.x0 * scaleX}px`;
                         div.style.top = `${bbox.y0 * scaleY}px`;
                         div.style.width = `${(bbox.x1 - bbox.x0) * scaleX}px`;
@@ -174,5 +170,6 @@
             };
         });
     </script>
+
 </body>
 </html>
